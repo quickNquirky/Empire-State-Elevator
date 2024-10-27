@@ -5,28 +5,32 @@ import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import empireStateElevator.Elevator.Direction;
 
 public class Scheduler {
+	
+	public enum Direction {
+		UP,
+		DOWN
+	}
 
 	private Map<UUID, Map<String, Integer>> upRequests = new HashMap<>(); // Outstanding requests going up
 	private Map<UUID, Map<String, Integer>> downRequests = new HashMap<>(); // Outstanding requests going down
 	private List<UUID> processingRequests = new ArrayList<>(); // Requests currently being handled
 	private List<Integer> stops = new ArrayList<>(); // Ordered list of stops. If not for the hot scheduling, this could be a queue
-	private Elevator elevator;
 	private int nextStop;
+	private int defaultFloor;
+	private Direction currentDirection = Direction.UP;
 	
-	public Scheduler(Elevator elevator) 
+	public Scheduler(int defaultFloor) 
 	{
-		this.elevator = elevator;
-		nextStop = elevator.getCurrentFloor();
+		System.out.println("scheduler constructor");
+		nextStop = defaultFloor;
+		this.defaultFloor = defaultFloor;
 	}
 	
 	// Handle new request from user
 	public synchronized void processNewRequest(int startFloor, int endFloor)
 	{	
-		//TODO: MUTEX LOCKS
 		//TODO: CHECK IF VALID REQUEST (within floor limits)
 		if (startFloor > endFloor)
 		{
@@ -34,9 +38,9 @@ public class Scheduler {
 			downRequests.put(uuid, getStartEndMap(startFloor, endFloor));
 			
 			// If current direction matches request and startFloor is on the way, hot update the stop list
-			if (elevator.getCurrentDirection() == Direction.DOWN && startFloor <= nextStop)
+			if (currentDirection == Direction.DOWN && startFloor <= nextStop)
 			{
-				hotUpdateStops(startFloor, endFloor, uuid);
+				updateStops(startFloor, endFloor, uuid);
 			}
 		}
 		else if (startFloor < endFloor)
@@ -45,9 +49,9 @@ public class Scheduler {
 			upRequests.put(uuid, getStartEndMap(startFloor, endFloor));
 			
 			// If current direction matches request and startFloor is on the way, hot update the stop list
-			if (elevator.getCurrentDirection() == Direction.UP && startFloor >= nextStop)
+			if (currentDirection == Direction.UP && startFloor >= nextStop)
 			{
-				hotUpdateStops(startFloor, endFloor, uuid);
+				updateStops(startFloor, endFloor, uuid);
 			}
 		}
 		else // same floor: toss request
@@ -57,27 +61,99 @@ public class Scheduler {
 	}
 	
 	// Handle request from Elevator for next stop
-	public void getNextFloor(Direction direction) throws InterruptedException
+	public synchronized int getNextFloor() throws InterruptedException
 	{
-		while (stops.isEmpty()) // If we don't have any requests, wait for the next one
+		if (stops.isEmpty()) // If we don't have any requests, reset and try to re-populate with active requests
 		{
-			TimeUnit.SECONDS.sleep(1);
+			// Clear out fulfilled requests and reset processing requests list
+			removeFulfilledRequests();
+			processingRequests.clear();
+			repopulateStops(); // Attempt to re-populate stops after reset
+			if(stops.isEmpty()) // If still no stops (have no requests), back to default floor
+			{
+				return defaultFloor;
+			}
 		}
 		
-		// up or down? (grab from either end of list)
-		// remove floor from list
-		// check 
-		
-		//If stops list is empty, enter hold cycle
-		//Once requests are received, return first number in stops list
-		//If current floor is the last floor in the stops list, clear fulfilled requests, re-populate list with existing requests, return first number in stops list
-		//If no more requests exist enter hold cycle
-		//Return next floor in list of stops
+		if(currentDirection == Direction.UP)
+		{
+			// If going up, return first element in ordered list (return lowest to highest)
+			return stops.remove(0);
+		}
+		else
+		{
+			// If going down, return last element in ordered list (return highest to lowest)
+			return stops.remove(stops.size()-1);
+		}
+
 	}
 	
 	//=== Private Methods ===
 	
-	private void hotUpdateStops (int startFloor, int endFloor, UUID uuid)
+	private void removeFulfilledRequests()
+	{
+		if(currentDirection == Direction.UP)
+		{
+			for(UUID uuid: processingRequests)
+			{
+				upRequests.remove(uuid);
+			}
+		}
+		else
+		{
+			for(UUID uuid: processingRequests)
+			{
+				downRequests.remove(uuid);
+			}
+		}
+	}
+	
+	private void repopulateStops()
+	{
+		if(currentDirection == Direction.UP)
+		{
+			if(!downRequests.isEmpty()) // Switch to down if we have any
+			{
+				for(Map.Entry<UUID, Map<String, Integer>> request: downRequests.entrySet())
+				{
+					updateStops(request.getValue().get("startFloor"), request.getValue().get("endFloor"), request.getKey());
+				}
+				currentDirection = Direction.DOWN;
+			}
+			else if(!upRequests.isEmpty()) // Otherwise check for more up requests
+			{
+				for(Map.Entry<UUID, Map<String, Integer>> request: upRequests.entrySet())
+				{
+					updateStops(request.getValue().get("startFloor"), request.getValue().get("endFloor"), request.getKey());
+				}
+			}
+			// Else no requests. Direction already up
+		}
+		else // currentDirection DOWN
+		{
+			if(!upRequests.isEmpty()) // Switch to up if we have any
+			{
+				for(Map.Entry<UUID, Map<String, Integer>> request: upRequests.entrySet())
+				{
+					updateStops(request.getValue().get("startFloor"), request.getValue().get("endFloor"), request.getKey());
+				}
+				currentDirection = Direction.UP;
+			}
+			else if(!downRequests.isEmpty()) // Otherwise check for more down requests
+			{
+				for(Map.Entry<UUID, Map<String, Integer>> request: downRequests.entrySet())
+				{
+					updateStops(request.getValue().get("startFloor"), request.getValue().get("endFloor"), request.getKey());
+				}
+			}
+			else // No requests. Default direction to up
+			{
+				currentDirection = Direction.UP;
+			}
+		}
+	}
+	
+	private void updateStops (int startFloor, int endFloor, UUID uuid)
 	{
 		addStop(startFloor);
 		addStop(endFloor);
