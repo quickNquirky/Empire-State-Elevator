@@ -1,5 +1,9 @@
 package empireStateElevator;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import utility.CommandLineInput;
 
 public class Main {
@@ -32,6 +36,9 @@ public class Main {
 				int stopFloorWait = Integer.parseInt(Settings.getSettingValue(Settings.stopFloorWaitField));
 				int passFloorWait = Integer.parseInt(Settings.getSettingValue(Settings.passFloorWaitField));
 				int sameFloorWait = Integer.parseInt(Settings.getSettingValue(Settings.sameFloorWaitField));
+				int topFloor = Integer.parseInt(Settings.getSettingValue(Settings.topFloorField));
+				int bottomFloor = Integer.parseInt(Settings.getSettingValue(Settings.bottomFloorField));
+				List<Scheduler> schedulers = new ArrayList<>();
 				//int usePreSeedFileField = Integer.parseInt(Settings.getSettingValue(Settings.usePreSeedFileField));
 				//int preSeedFilePath = Integer.parseInt(Settings.getSettingValue(Settings.preSeedFilePathField));
 				// TODO: topFloor
@@ -39,8 +46,10 @@ public class Main {
 				// TODO: spin up router
 				for(int i = 1; i <= numberOfElevators; i++)
 				{
-					runElevator("Elevator " + String.valueOf(i), defaultFloor, stopFloorWait, passFloorWait, sameFloorWait);
+					schedulers.add(runElevator("Elevator " + String.valueOf(i), defaultFloor, stopFloorWait, passFloorWait, sameFloorWait));
 				}
+				RequestRouter router = new RequestRouter(schedulers, topFloor, bottomFloor);
+				router.userRequestLoop();
 				quit = true;
 				break;
 			case 2: // Settings
@@ -61,20 +70,9 @@ public class Main {
 	
 	private static Scheduler runElevator(String elevatorName, int defaultFloor, int stopFloorWait, int passFloorWait, int sameFloorWait)
 	{
-		Scheduler scheduler = new Scheduler(defaultFloor);
+		Scheduler scheduler = new Scheduler(defaultFloor, elevatorName);
 		Elevator elevator = new Elevator(elevatorName, scheduler, defaultFloor, stopFloorWait, passFloorWait, sameFloorWait);
 		elevator.run();
-		scheduler.processNewRequest(2, 5);
-		scheduler.processNewRequest(7, 30);
-		scheduler.processNewRequest(20, 5);
-		scheduler.processNewRequest(2, 5);
-		scheduler.processNewRequest(3, 5);
-		scheduler.processNewRequest(4, 5);
-		scheduler.processNewRequest(9, 5);
-		scheduler.processNewRequest(8, 5);
-		scheduler.processNewRequest(7, 5);
-		scheduler.processNewRequest(6, 5);
-		scheduler.processNewRequest(5, 5);
 		return scheduler;
 	}
 	

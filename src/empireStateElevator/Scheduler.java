@@ -22,16 +22,20 @@ public class Scheduler {
 	private int defaultFloor;
 	// Default direction is up (I'm assuming the building is mostly above ground)
 	private Direction currentDirection = Direction.UP;
+	private int numberOfRequests = 0; // Track number of requests for routing priority
+	private String elevatorName;
 	
-	public Scheduler(int defaultFloor) 
+	public Scheduler(int defaultFloor, String elevatorName) 
 	{
 		nextStop = defaultFloor;
 		this.defaultFloor = defaultFloor;
+		this.elevatorName = elevatorName;
 	}
 	
 	// Handle new request from user
 	public synchronized void processNewRequest(int startFloor, int endFloor)
 	{	
+		numberOfRequests++;
 		if (startFloor > endFloor)
 		{
 			UUID uuid = UUID.randomUUID(); // Make sure the requests can be found later
@@ -54,7 +58,7 @@ public class Scheduler {
 				updateStops(startFloor, endFloor, uuid);
 			}
 		}
-		else // same floor: toss request
+		else // same floor: toss request (should be handled by router)
 		{
 			System.out.println("Ignoring request for same floor");
 		}
@@ -69,6 +73,7 @@ public class Scheduler {
 			if(!processingRequests.isEmpty())
 			{
 				removeFulfilledRequests();
+				numberOfRequests -= processingRequests.size(); // reduce requests
 				processingRequests.clear();
 			}
 			repopulateStops(); // Attempt to re-populate stops after reset
@@ -89,6 +94,16 @@ public class Scheduler {
 			return stops.remove(stops.size()-1);
 		}
 
+	}
+	
+	public int getNumberOfRequests()
+	{
+		return numberOfRequests;
+	}
+	
+	public String getElevatorName()
+	{
+		return elevatorName;
 	}
 	
 	//=== Private Methods ===

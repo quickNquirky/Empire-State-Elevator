@@ -35,6 +35,8 @@ public class DisplayElements {
 		System.out.println("\t5: " + Settings.sameFloorWaitField + "\t\t\t" + Settings.getSettingValue(Settings.sameFloorWaitField));
 		System.out.println("\t6: " + Settings.usePreSeedFileField + "\t\t\t" + Settings.getSettingValue(Settings.usePreSeedFileField));
 		System.out.println("\t7: " + Settings.preSeedFilePathField + "\t\t\t" + Settings.getSettingValue(Settings.preSeedFilePathField));
+		System.out.println("\t8: " + Settings.topFloorField + "\t\t\t" + Settings.getSettingValue(Settings.topFloorField));
+		System.out.println("\t9: " + Settings.bottomFloorField + "\t\t\t" + Settings.getSettingValue(Settings.bottomFloorField));
 		System.out.println("\n\tEnter the setting number you wish to update or 'done' to return to main menu:");
 	}
 }

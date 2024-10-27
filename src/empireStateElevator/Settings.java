@@ -20,6 +20,8 @@ public class Settings {
 	public static final String sameFloorWaitField = "Same_Floor_Wait";
 	public static final String usePreSeedFileField = "Use_Pre_Seed_File";
 	public static final String preSeedFilePathField = "Pre_Seed_File_Path";
+	public static final String topFloorField = "Top_Floor";
+	public static final String bottomFloorField = "Bottom_Floor";
 
 	// Run the settings subroutine
 	public static void run() throws Exception {
@@ -37,37 +39,47 @@ public class Settings {
 				case "1":
 					System.out.println("Enter the desired default floor:");
 					fieldName = defaultFloorField;
-					value = getIntegerFromUser();
+					value = CommandLineInput.getIntegerFromUser();
 					break;
 				case "2":
 					System.out.println("Enter the desired number of elevators:");
 					fieldName = numberOfElevatorsField;
-					value = getIntegerFromUser();
+					value = CommandLineInput.getIntegerFromUser();
 					break;
 				case "3":
 					System.out.println("Enter the number of seconds to wait when stopping at a floor:");
 					fieldName = stopFloorWaitField;
-					value = getIntegerFromUser();
+					value = CommandLineInput.getIntegerFromUser();
 					break;
 				case "4":
 					System.out.println("Enter the number of seconds to wait when passing a floor:");
 					fieldName = passFloorWaitField;
-					value = getIntegerFromUser();
+					value = CommandLineInput.getIntegerFromUser();
 					break;
 				case "5":
 					System.out.println("Enter the number of seconds to wait when stopped:");
 					fieldName = sameFloorWaitField;
-					value = getIntegerFromUser();
+					value = CommandLineInput.getIntegerFromUser();
 					break;
 				case "6":
 					System.out.println("Use pre seed File? (true or false):");
 					fieldName = usePreSeedFileField;
-					value = getBooleanFromUser();
+					value = CommandLineInput.getBooleanFromUser();
 					break;
 				case "7":
 					System.out.println("Enter the file path of the desired pre seed file:");
 					fieldName = preSeedFilePathField;
 					value = CommandLineInput.getCommandLineInput();
+					break;
+				case "8":
+					System.out.println("Enter the top floor:");
+					fieldName = topFloorField;
+					value = CommandLineInput.getIntegerFromUser();
+					break;
+				case "9":
+					System.out.println("Enter the bottom floor:");
+					fieldName = bottomFloorField;
+					value = CommandLineInput.getIntegerFromUser();
 					break;
 				default:
 					fieldName = "Invalid";
@@ -99,6 +111,8 @@ public class Settings {
 		defaultSettings.setProperty(sameFloorWaitField, "2");
 		defaultSettings.setProperty(usePreSeedFileField, "false");
 		defaultSettings.setProperty(preSeedFilePathField, "preSeed.txt");
+		defaultSettings.setProperty(topFloorField, "102");
+		defaultSettings.setProperty(bottomFloorField, "-2");
 		settings = new Properties(defaultSettings);
 		
 		if (settingsFile.exists()) {
@@ -111,6 +125,8 @@ public class Settings {
 			settings.setProperty(sameFloorWaitField, "2");
 			settings.setProperty(usePreSeedFileField, "false");
 			settings.setProperty(preSeedFilePathField, "preSeed.txt");
+			defaultSettings.setProperty(topFloorField, "102");
+			defaultSettings.setProperty(bottomFloorField, "-2");
 			writeSettings();
 		}
 	}
@@ -121,44 +137,6 @@ public class Settings {
 	}
 	
 	//=== Private Methods ===
-	
-	private static String getIntegerFromUser()
-	{
-		String input = "";
-		boolean isValid = false;
-		while(!isValid)
-		{
-			input = CommandLineInput.getCommandLineInput();
-			try 
-			{
-				Integer.parseInt(input);
-				isValid = true;
-			} 
-			catch (Exception e) {
-				System.out.println("Invalid input (must be integer). Try again:");
-			}
-		}
-		return input;
-	}
-	
-	private static String getBooleanFromUser()
-	{
-		String input = "";
-		boolean isValid = false;
-		while(!isValid)
-		{
-			input = CommandLineInput.getCommandLineInput();
-			try 
-			{
-				Boolean.parseBoolean(input);
-				isValid = true;
-			} 
-			catch (Exception e) {
-				System.out.println("Invalid input (must be integer). Try again:");
-			}
-		}
-		return input;
-	}
 	
 	private static void updateSetting(String fieldName, String value) throws Exception
 	{
