@@ -16,14 +16,15 @@ public class Scheduler {
 	private Map<UUID, Map<String, Integer>> upRequests = new HashMap<>(); // Outstanding requests going up
 	private Map<UUID, Map<String, Integer>> downRequests = new HashMap<>(); // Outstanding requests going down
 	private List<UUID> processingRequests = new ArrayList<>(); // Requests currently being handled
-	private List<Integer> stops = new ArrayList<>(); // Ordered list of stops. If not for the hot scheduling, this could be a queue
+	// Ordered list of stops. If not for the hot scheduling, this could be a queue
+	private List<Integer> stops = new ArrayList<>();
 	private int nextStop;
 	private int defaultFloor;
+	// Default direction is up (I'm assuming the building is mostly above ground)
 	private Direction currentDirection = Direction.UP;
 	
 	public Scheduler(int defaultFloor) 
 	{
-		System.out.println("scheduler constructor");
 		nextStop = defaultFloor;
 		this.defaultFloor = defaultFloor;
 	}
@@ -31,10 +32,9 @@ public class Scheduler {
 	// Handle new request from user
 	public synchronized void processNewRequest(int startFloor, int endFloor)
 	{	
-		//TODO: CHECK IF VALID REQUEST (within floor limits)
 		if (startFloor > endFloor)
 		{
-			UUID uuid = UUID.randomUUID();
+			UUID uuid = UUID.randomUUID(); // Make sure the requests can be found later
 			downRequests.put(uuid, getStartEndMap(startFloor, endFloor));
 			
 			// If current direction matches request and startFloor is on the way, hot update the stop list
@@ -45,7 +45,7 @@ public class Scheduler {
 		}
 		else if (startFloor < endFloor)
 		{
-			UUID uuid = UUID.randomUUID();
+			UUID uuid = UUID.randomUUID(); // Make sure the requests can be found later
 			upRequests.put(uuid, getStartEndMap(startFloor, endFloor));
 			
 			// If current direction matches request and startFloor is on the way, hot update the stop list
@@ -65,9 +65,12 @@ public class Scheduler {
 	{
 		if (stops.isEmpty()) // If we don't have any requests, reset and try to re-populate with active requests
 		{
-			// Clear out fulfilled requests and reset processing requests list
-			removeFulfilledRequests();
-			processingRequests.clear();
+			// If requests have been fulfilled, clean up fulfilled requests and reset processing requests list
+			if(!processingRequests.isEmpty())
+			{
+				removeFulfilledRequests();
+				processingRequests.clear();
+			}
 			repopulateStops(); // Attempt to re-populate stops after reset
 			if(stops.isEmpty()) // If still no stops (have no requests), back to default floor
 			{
@@ -178,27 +181,3 @@ public class Scheduler {
 		}
 	}
 }
-
-/*
- * - Scheduler:
- * 		- Mutex locked up dictionary, down dictionary {uuid:{startFloor: int, endFloor: int}}
- * 		- Mutex locked list of request UUIDs being fulfilled
- * 		- Mutex locked ordered list of stops
- * 
- * 		- processNewRequest(startFloor, endFloor) from user:
- * 			- Assign request uuid and store in respective dictionary
- * 			- If request direction matches, can we add to current stop schedule?
- * 				- What floor is elevator currently on?
- * 				- If so, add stops to stop list, and add uuid to list of requests being fulfilled
- * 
- * 		- getNextStop(Current floor) from elevator
- * 			- If stops list is empty, enter hold cycle
- * 				- Once requests are received, return first number in stops list
- * 			- If current floor is the last floor in the stops list, clear fulfilled requests, re-populate list with existing requests, return first number in stops list
- * 				- If no more requests exist enter hold cycle
- * 			- Return next floor in list of stops
- * 
- * - Elevator:
- * 		- Current floor
- * 		- GetCurrentFloor
- * */
