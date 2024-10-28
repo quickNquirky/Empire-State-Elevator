@@ -8,6 +8,7 @@ Usage:
         - Depending on the settings, a pre-seed request file will be injected into the application to automatically move the elevators
     - Settings: This option allows the user to view and update the application's settings
         - Default_Floor: Integer indicating the floor the elevators will start at and return to if there are no outstanding requests (Default 1)
+        	- I realized this needs validation after I turned it in (can break floor rules)
 	    - Number_Of_Elevators: Integer indicating the number of elevators to generate (Default 1)
 	    - Stop_Floor_Wait: Integer indicating the number of seconds the elevators will wait when stopping at a floor (Default 3)
 	    - Pass_Floor_Wait: Integer indicating the number of seconds the elevators will wait when passing a floor (Default 1)
