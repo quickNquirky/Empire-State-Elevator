@@ -18,26 +18,26 @@ Usage:
 	    - Bottom_Floor: Integer indicationg the lowest floor allowed (Default -2 - Reflects actual floors of Empire State Building)
 
 Design:
-    - DisplayElements: Handles the display of larger UI elements (menus and splash screen)
-    - Elevator:
-        - Runs on it's own thread to simulate an elevator
-        - Attached to individual GUI to display progress
-        - Paired with a Scheduler for receiving instructions
-    - RequestsRouter:
-        - Entry point for user's elevator requests
-        - Holds a collection of available Schedulers to send user requests
-        - Routes based on number of requests a Scheduler currently has
-    - Scheduler:
-        - Take in and manage user requests for a single elevator
-        - Direct elevator based on the elevator's current direction and outstanding requests
-        - Primary data handler
-        - Mutex locked major operations to avoid race conditions
-    - Settings: Hanldes the application's configuration
-    - CommandLineInput: Utility to streamline colletion of user input
+- DisplayElements: Handles the display of larger UI elements (menus and splash screen)
+- Elevator:
+    - Runs on it's own thread to simulate an elevator
+    - Attached to individual GUI to display progress
+    - Paired with a Scheduler for receiving instructions
+- RequestsRouter:
+    - Entry point for user's elevator requests
+    - Holds a collection of available Schedulers to send user requests
+    - Routes based on number of requests a Scheduler currently has
+- Scheduler:
+    - Take in and manage user requests for a single elevator
+    - Direct elevator based on the elevator's current direction and outstanding requests
+    - Primary data handler
+    - Mutex locked major operations to avoid race conditions
+- Settings: Hanldes the application's configuration
+- CommandLineInput: Utility to streamline colletion of user input
 
 Assumptions:
-    - Elevators have a default floor
-    - End floor is known before passenger is picked up
+- Elevators have a default floor
+- End floor is known before passenger is picked up
 
 Things I'd do if I had infinite time (in no particular order):
 - Better error Handling
