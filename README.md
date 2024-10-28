@@ -15,7 +15,7 @@ Usage:
 	    - Use_Pre_Seed_File: Boolean that decides whether or not to use a pre-seeded request file (Default false)
 	    - Pre_Seed_File_Path: String that stores the path to a desired pre-seeded request file (Default preSeed.txt)
 	    - Top_Floor: Integer indicating the highest floor allowed (Default 102 - Reflects actual floors of Empire State Building)
-	    - Bottom_Floor: Integer indicationg the lowest floor allowed (Default -2 - Reflects actual floors of Empire State Building)
+	    - Bottom_Floor: Integer indicating the lowest floor allowed (Default -2 - Reflects actual floors of Empire State Building)
 
 Design:
 - DisplayElements: Handles the display of larger UI elements (menus and splash screen)
@@ -32,8 +32,8 @@ Design:
     - Direct elevator based on the elevator's current direction and outstanding requests
     - Primary data handler
     - Mutex locked major operations to avoid race conditions
-- Settings: Hanldes the application's configuration
-- CommandLineInput: Utility to streamline colletion of user input
+- Settings: Handles the application's configuration
+- CommandLineInput: Utility to streamline collection of user input
 
 Assumptions:
 - Elevators have a default floor
