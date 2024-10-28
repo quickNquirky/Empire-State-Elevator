@@ -28,7 +28,8 @@ public class RequestRouter {
 		
 		for(List<Integer> request: preSeededRequests)
 		{
-			routeRequest(request.get(0), request.get(1));
+			if(validateFloor(request.get(0)) && validateFloor(request.get(1))) // Validate requests
+				routeRequest(request.get(0), request.get(1));
 		}
 	}
 	
@@ -80,18 +81,7 @@ public class RequestRouter {
 				input = CommandLineInput.getIntegerFromUser();
 				intFirstInput = Integer.parseInt(input);
 				// This validation stuff could be broken out into a separate 'validator' class
-				if(input.equals("0") || input.equals("13")) // Check for special cases
-				{
-					System.out.println("Input invalid (0 floor does not exist and the 13th floor is ghosts only)");
-				}
-				else if(intFirstInput > topFloor || intFirstInput < bottomFloor) // Check boundaries
-				{
-					System.out.println("Input out of bounds (top floor is " + topFloor + " and bottom floor is " + bottomFloor + ")");
-				}
-				else
-				{
-					inputValid = true;
-				}
+				inputValid = validateFloor(intFirstInput);
 			}
 			inputValid = false; // Reset validation status
 			while(!inputValid)
@@ -100,20 +90,26 @@ public class RequestRouter {
 				input = CommandLineInput.getIntegerFromUser();
 				intSecondInput = Integer.parseInt(input);
 				// This validation stuff could be broken out into a separate 'validator' class
-				if(input.equals("0") || input.equals("13")) // Check for special cases
-				{
-					System.out.println("Input invalid (0 floor does not exist and the 13th floor is ghosts only)");
-				}
-				else if(intSecondInput > topFloor || intSecondInput < bottomFloor)  // Check boundaries
-				{
-					System.out.println("Input out of bounds (top floor is " + topFloor + " and bottom floor is " + bottomFloor + ")");
-				}
-				else
-				{
-					inputValid = true;
-				}
+				inputValid = validateFloor(intSecondInput);
 			}
 			routeRequest(intFirstInput, intSecondInput); // Once we have good input, route the request
 		}
+	}
+	
+	//=== Private Methods ===
+	
+	private boolean validateFloor(int floor)
+	{
+		if(floor == 0 || floor == 13) // Check for special cases
+		{
+			System.out.println("Input invalid (0 floor does not exist and the 13th floor is ghosts only)");
+			return false;
+		}
+		if(floor > topFloor || floor < bottomFloor) // Check boundaries
+		{
+			System.out.println("Input out of bounds (top floor is " + topFloor + " and bottom floor is " + bottomFloor + ")");
+			return false;
+		}
+		return true;
 	}
 }
