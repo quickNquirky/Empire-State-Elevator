@@ -6,7 +6,7 @@ import java.util.List;
 
 public class RequestRouter {
 	
-	private List<Scheduler> schedulers = new ArrayList<>();;
+	private List<Scheduler> schedulers = new ArrayList<>();
 	private int topFloor;
 	private int bottomFloor;
 	
@@ -16,6 +16,20 @@ public class RequestRouter {
 		this.schedulers = schedulers;
 		this.topFloor = topFloor;
 		this.bottomFloor = bottomFloor;
+	}
+	
+	public RequestRouter(List<Scheduler> schedulers, int topFloor, int bottomFloor, List<List<Integer>> preSeededRequests)
+	{
+		this.schedulers = schedulers;
+		this.topFloor = topFloor;
+		this.bottomFloor = bottomFloor;
+		
+		for(List<Integer> request: preSeededRequests)
+		{
+			System.out.println(request.get(0));
+			System.out.println(request.get(1));
+			routeRequest(request.get(0), request.get(1));
+		}
 	}
 	
 	public void routeRequest(int startFloor, int endFloor)
@@ -60,14 +74,10 @@ public class RequestRouter {
 			inputValid = false;
 			while(!inputValid)
 			{
-				System.out.println("Enter the start floor or 'done' to quit:");
+				System.out.println("Enter the start floor:");
 				input = CommandLineInput.getIntegerFromUser();
 				intFirstInput = Integer.parseInt(input);
-				if(input.toLowerCase().equals("done"))
-				{
-					return;
-				}
-				else if(input.equals("0") || input.equals("13"))
+				if(input.equals("0") || input.equals("13"))
 				{
 					System.out.println("Input invalid (0 floor does not exist and the 13th floor is ghosts only)");
 				}
@@ -80,18 +90,13 @@ public class RequestRouter {
 					inputValid = true;
 				}
 			}
-		
 			inputValid = false;
 			while(!inputValid)
 			{
-				System.out.println("Enter the stop floor or 'done' to quit:");
+				System.out.println("Enter the stop floor:");
 				input = CommandLineInput.getIntegerFromUser();
 				intSecondInput = Integer.parseInt(input);
-				if(input.toLowerCase().equals("done"))
-				{
-					return;
-				}
-				else if(input.equals("0") || input.equals("13"))
+				if(input.equals("0") || input.equals("13"))
 				{
 					System.out.println("Input invalid (0 floor does not exist and the 13th floor is ghosts only)");
 				}

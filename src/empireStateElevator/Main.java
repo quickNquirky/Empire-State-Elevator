@@ -2,7 +2,9 @@ package empireStateElevator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
 
 import utility.CommandLineInput;
 
@@ -38,18 +40,26 @@ public class Main {
 				int sameFloorWait = Integer.parseInt(Settings.getSettingValue(Settings.sameFloorWaitField));
 				int topFloor = Integer.parseInt(Settings.getSettingValue(Settings.topFloorField));
 				int bottomFloor = Integer.parseInt(Settings.getSettingValue(Settings.bottomFloorField));
+				boolean usePreSeedFile = Boolean.parseBoolean(Settings.getSettingValue(Settings.usePreSeedFileField));
+				String preSeedFilePath = Settings.getSettingValue(Settings.preSeedFilePathField);
 				List<Scheduler> schedulers = new ArrayList<>();
-				//int usePreSeedFileField = Integer.parseInt(Settings.getSettingValue(Settings.usePreSeedFileField));
-				//int preSeedFilePath = Integer.parseInt(Settings.getSettingValue(Settings.preSeedFilePathField));
-				// TODO: topFloor
-				// TODO: bottomFloor
-				// TODO: spin up router
+				
 				for(int i = 1; i <= numberOfElevators; i++)
 				{
 					schedulers.add(runElevator("Elevator " + String.valueOf(i), defaultFloor, stopFloorWait, passFloorWait, sameFloorWait));
 				}
-				RequestRouter router = new RequestRouter(schedulers, topFloor, bottomFloor);
-				router.userRequestLoop();
+				
+				if(usePreSeedFile)
+				{
+					List<List<Integer>> preSeededRequests = readRequestsFromFile(preSeedFilePath);
+					RequestRouter router = new RequestRouter(schedulers, topFloor, bottomFloor, preSeededRequests);
+					router.userRequestLoop();
+				}
+				else
+				{
+					RequestRouter router = new RequestRouter(schedulers, topFloor, bottomFloor);
+					router.userRequestLoop();
+				}
 				quit = true;
 				break;
 			case 2: // Settings
@@ -61,9 +71,6 @@ public class Main {
 				break;
 			}
 		}
-		
-		// Set up for user input
-		// TODO: Check requests are within floor limits
 	}
 	
 	//=== Private Methods ===
@@ -100,5 +107,42 @@ public class Main {
 			}
 		}
 		return 0; // Shouldn't be reachable
+	}
+	
+	private static List<List<Integer>> readRequestsFromFile(String preSeedFilePath)
+	{
+		List<List<Integer>> requests = new ArrayList<>();
+		String request = "";
+		String[] floors;
+		try 
+		{
+			File preSeedFile = new File(preSeedFilePath);
+			Scanner fileReader = new Scanner(preSeedFile);
+			while (fileReader.hasNextLine()) 
+			{
+				request = fileReader.nextLine();
+				List<Integer> parsedRequest = new ArrayList<>();
+				try
+				{
+					floors = request.split(",");
+					parsedRequest.add(Integer.parseInt(floors[0]));
+					parsedRequest.add(Integer.parseInt(floors[1]));
+					System.out.println(parsedRequest);
+					requests.add(parsedRequest);
+				}
+				catch (Exception e)
+				{
+					System.out.println("Failed to parse '" + request + "'");
+				}
+				
+			}
+			fileReader.close();
+		} 
+		catch (FileNotFoundException e) 
+		{
+			System.out.println("Failed to find pre-seed file (skipping)");
+		}
+		System.out.println(requests);
+		return requests;
 	}
 }
