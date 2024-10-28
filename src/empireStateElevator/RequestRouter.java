@@ -26,8 +26,6 @@ public class RequestRouter {
 		
 		for(List<Integer> request: preSeededRequests)
 		{
-			System.out.println(request.get(0));
-			System.out.println(request.get(1));
 			routeRequest(request.get(0), request.get(1));
 		}
 	}
@@ -74,7 +72,7 @@ public class RequestRouter {
 			inputValid = false;
 			while(!inputValid)
 			{
-				System.out.println("Enter the start floor:");
+				System.out.println("\nEnter the start floor:");
 				input = CommandLineInput.getIntegerFromUser();
 				intFirstInput = Integer.parseInt(input);
 				if(input.equals("0") || input.equals("13"))
@@ -93,7 +91,7 @@ public class RequestRouter {
 			inputValid = false;
 			while(!inputValid)
 			{
-				System.out.println("Enter the stop floor:");
+				System.out.println("\nEnter the stop floor:");
 				input = CommandLineInput.getIntegerFromUser();
 				intSecondInput = Integer.parseInt(input);
 				if(input.equals("0") || input.equals("13"))

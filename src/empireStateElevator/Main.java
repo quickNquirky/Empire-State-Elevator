@@ -127,7 +127,6 @@ public class Main {
 					floors = request.split(",");
 					parsedRequest.add(Integer.parseInt(floors[0]));
 					parsedRequest.add(Integer.parseInt(floors[1]));
-					System.out.println(parsedRequest);
 					requests.add(parsedRequest);
 				}
 				catch (Exception e)

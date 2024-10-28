@@ -37,47 +37,47 @@ public class Settings {
 				switch (settingSelection)
 				{
 				case "1":
-					System.out.println("Enter the desired default floor:");
+					System.out.println("\nEnter the desired default floor:");
 					fieldName = defaultFloorField;
 					value = CommandLineInput.getIntegerFromUser();
 					break;
 				case "2":
-					System.out.println("Enter the desired number of elevators:");
+					System.out.println("\nEnter the desired number of elevators:");
 					fieldName = numberOfElevatorsField;
 					value = CommandLineInput.getIntegerFromUser();
 					break;
 				case "3":
-					System.out.println("Enter the number of seconds to wait when stopping at a floor:");
+					System.out.println("\nEnter the number of seconds to wait when stopping at a floor:");
 					fieldName = stopFloorWaitField;
 					value = CommandLineInput.getIntegerFromUser();
 					break;
 				case "4":
-					System.out.println("Enter the number of seconds to wait when passing a floor:");
+					System.out.println("\nEnter the number of seconds to wait when passing a floor:");
 					fieldName = passFloorWaitField;
 					value = CommandLineInput.getIntegerFromUser();
 					break;
 				case "5":
-					System.out.println("Enter the number of seconds to wait when stopped:");
+					System.out.println("\nEnter the number of seconds to wait when stopped:");
 					fieldName = sameFloorWaitField;
 					value = CommandLineInput.getIntegerFromUser();
 					break;
 				case "6":
-					System.out.println("Use pre seed File? (true or false):");
+					System.out.println("\nUse pre seed File? (true or false):");
 					fieldName = usePreSeedFileField;
 					value = CommandLineInput.getBooleanFromUser();
 					break;
 				case "7":
-					System.out.println("Enter the file path of the desired pre seed file:");
+					System.out.println("\nEnter the file path of the desired pre seed file:");
 					fieldName = preSeedFilePathField;
 					value = CommandLineInput.getCommandLineInput();
 					break;
 				case "8":
-					System.out.println("Enter the top floor:");
+					System.out.println("\nEnter the top floor:");
 					fieldName = topFloorField;
 					value = CommandLineInput.getIntegerFromUser();
 					break;
 				case "9":
-					System.out.println("Enter the bottom floor:");
+					System.out.println("\nEnter the bottom floor:");
 					fieldName = bottomFloorField;
 					value = CommandLineInput.getIntegerFromUser();
 					break;
