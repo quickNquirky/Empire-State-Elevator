@@ -7,12 +7,19 @@ import java.util.concurrent.TimeUnit;
 public class Elevator implements Runnable {
 	
 	private final String elevatorName; // Used for naming GUI
-	private final Scheduler scheduler;
-	private final long stopFloorWait;
-	private final long passFloorWait;
-	private final long sameFloorWait;
+	private final Scheduler scheduler; // Instance of Scheduler associated with elevator
+	private final long stopFloorWait; // Time to wait at a floor when stopping
+	private final long passFloorWait; // Time to wait at a floor when not stopping (passing)
+	private final long sameFloorWait; // Time to wait when told to go to currentFloor
 	private int currentFloor;
 	private Direction currentDirection;
+	
+	public enum Direction
+	{
+		UP,
+		DOWN,
+		STOPPED
+	}
 	
 	public Elevator(String elevatorName, Scheduler scheduler, int defaultFloor, long stopFloorWait, long passFloorWait, long sameFloorWait) 
 	{
@@ -23,13 +30,7 @@ public class Elevator implements Runnable {
 		this.sameFloorWait = sameFloorWait;
 		
 		currentFloor = defaultFloor; // Start at default floor
-		currentDirection = Direction.STOPPED;
-	}
-
-	public enum Direction {
-		UP,
-		DOWN,
-		STOPPED
+		currentDirection = Direction.STOPPED; // Stopped by default
 	}
 	
 	public void run()
@@ -48,9 +49,10 @@ public class Elevator implements Runnable {
             elevatorGui.getContentPane().add(scrollLog, BorderLayout.CENTER); // Add scroll log to Window
             elevatorGui.setVisible(true); // Show window
             
+            // Spin up new thread to run elevator simulation and update GUI
             new Thread(() -> {
             	elevatorLog.append("Starting at home floor: " + currentFloor + "\n");
-            	while(true)
+            	while(true) // Elevator continuously runs
 				{
 					try {
 						int nextFloor = scheduler.getNextFloor();
@@ -73,19 +75,22 @@ public class Elevator implements Runnable {
 							while(currentFloor > nextFloor) // Go to requested floor
 							{
 								currentFloor--;
-								elevatorLog.append(String.valueOf(currentFloor) + "\n");
-								// Ensure we scroll with new text
-								elevatorLog.setCaretPosition(elevatorLog.getDocument().getLength());
-								if(currentFloor == nextFloor) // Arrived
+								if(currentFloor != 0 && currentFloor != 13) // Floors 0 and 13 don't exist
 								{
-									elevatorLog.append("Stopping\n");
+									elevatorLog.append(String.valueOf(currentFloor) + "\n");
 									// Ensure we scroll with new text
 									elevatorLog.setCaretPosition(elevatorLog.getDocument().getLength());
-									TimeUnit.SECONDS.sleep(stopFloorWait);
-								}
-								else // Skip floor
-								{
-									TimeUnit.SECONDS.sleep(passFloorWait);
+									if(currentFloor == nextFloor) // Arrived
+									{
+										elevatorLog.append("Stopping\n");
+										// Ensure we scroll with new text
+										elevatorLog.setCaretPosition(elevatorLog.getDocument().getLength());
+										TimeUnit.SECONDS.sleep(stopFloorWait);
+									}
+									else // Skip floor
+									{
+										TimeUnit.SECONDS.sleep(passFloorWait);
+									}
 								}
 							}
 						}
@@ -102,17 +107,20 @@ public class Elevator implements Runnable {
 							while(currentFloor < nextFloor) // Go to requested floor
 							{
 								currentFloor++;
-								elevatorLog.append(String.valueOf(currentFloor) + "\n");
-								// Ensure we scroll with new text
-								elevatorLog.setCaretPosition(elevatorLog.getDocument().getLength());
-								if(currentFloor == nextFloor) // Arrived
+								if(currentFloor != 0 && currentFloor != 13) // Floors 0 and 13 don't exist
 								{
-									elevatorLog.append("Stopping\n");
-									TimeUnit.SECONDS.sleep(stopFloorWait);
-								}
-								else // Skip floor
-								{
-									TimeUnit.SECONDS.sleep(passFloorWait);
+									elevatorLog.append(String.valueOf(currentFloor) + "\n");
+									// Ensure we scroll with new text
+									elevatorLog.setCaretPosition(elevatorLog.getDocument().getLength());
+									if(currentFloor == nextFloor) // Arrived
+									{
+										elevatorLog.append("Stopping\n");
+										TimeUnit.SECONDS.sleep(stopFloorWait);
+									}
+									else // Skip floor
+									{
+										TimeUnit.SECONDS.sleep(passFloorWait);
+									}
 								}
 							}
 						}

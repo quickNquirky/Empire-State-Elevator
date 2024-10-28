@@ -13,7 +13,7 @@ public class Main {
 	{
 		DisplayElements.displaySplash(); // Print splash
 
-		// Initialize in settings
+		// Initialize settings
 		try {
 			Settings.startup();
 		} 
@@ -24,10 +24,10 @@ public class Main {
 		
 		boolean quit = false;
 
-		while(!quit)
+		while(!quit) // Main application loop
 		{
 			DisplayElements.displayMainMenu(); // Print main menu
-			int selection = mainMenuInputLoop();
+			int selection = mainMenuInputLoop(); // Get main menu selection from user
 		
 			switch(selection)
 			{
@@ -42,29 +42,33 @@ public class Main {
 				int bottomFloor = Integer.parseInt(Settings.getSettingValue(Settings.bottomFloorField));
 				boolean usePreSeedFile = Boolean.parseBoolean(Settings.getSettingValue(Settings.usePreSeedFileField));
 				String preSeedFilePath = Settings.getSettingValue(Settings.preSeedFilePathField);
-				List<Scheduler> schedulers = new ArrayList<>();
 				
-				for(int i = 1; i <= numberOfElevators; i++)
+				List<Scheduler> schedulers = new ArrayList<>(); // Collect schedulers for routing
+				
+				for(int i = 1; i <= numberOfElevators; i++) // Spin up elevators
 				{
 					schedulers.add(runElevator("Elevator " + String.valueOf(i), defaultFloor, stopFloorWait, passFloorWait, sameFloorWait));
 				}
 				
 				if(usePreSeedFile)
 				{
+					// Parse pre-seed file
 					List<List<Integer>> preSeededRequests = readRequestsFromFile(preSeedFilePath);
+					// Spin up router with pre-seed requests
 					RequestRouter router = new RequestRouter(schedulers, topFloor, bottomFloor, preSeededRequests);
-					router.userRequestLoop();
+					router.userRequestLoop(); // Start accepting user input
 				}
 				else
 				{
+					// Spin up router without pre-seed requests
 					RequestRouter router = new RequestRouter(schedulers, topFloor, bottomFloor);
-					router.userRequestLoop();
+					router.userRequestLoop(); // Start accepting user input
 				}
 				quit = true;
 				break;
 			case 2: // Settings
 				DisplayElements.displaySettingsMenu(); // Print settings menu
-				Settings.run();
+				Settings.run(); // Run settings subroutine
 				break;
 			default: // Should not be reachable
 				quit = true;
@@ -75,6 +79,7 @@ public class Main {
 	
 	//=== Private Methods ===
 	
+	// Spin up a new elevator/scheduler pair and return the scheduler for routing
 	private static Scheduler runElevator(String elevatorName, int defaultFloor, int stopFloorWait, int passFloorWait, int sameFloorWait)
 	{
 		Scheduler scheduler = new Scheduler(defaultFloor, elevatorName);
@@ -83,6 +88,7 @@ public class Main {
 		return scheduler;
 	}
 	
+	// Get valid main menu selection from user
 	private static int mainMenuInputLoop()
 	{
 		boolean selectionValid = false;
@@ -102,18 +108,18 @@ public class Main {
 				return 2;
 			default:
 				System.out.println("Selection not recognized. Try again:\n");
-				mainMenuSelection = CommandLineInput.getCommandLineInput().toLowerCase();
 				break;
 			}
 		}
 		return 0; // Shouldn't be reachable
 	}
 	
+	// Read pre-seed file and parse out the requests
 	private static List<List<Integer>> readRequestsFromFile(String preSeedFilePath)
 	{
-		List<List<Integer>> requests = new ArrayList<>();
-		String request = "";
-		String[] floors;
+		List<List<Integer>> requests = new ArrayList<>(); // Data structure to be returned
+		String request = ""; // Holds raw text from file
+		String[] floors; // Holding variable for parsing
 		try 
 		{
 			File preSeedFile = new File(preSeedFilePath);
@@ -121,15 +127,15 @@ public class Main {
 			while (fileReader.hasNextLine()) 
 			{
 				request = fileReader.nextLine();
-				List<Integer> parsedRequest = new ArrayList<>();
+				List<Integer> parsedRequest = new ArrayList<>(); // Will be added as element of returned data structure
 				try
 				{
-					floors = request.split(",");
+					floors = request.split(","); // Expected format: startfloor,endfloor
 					parsedRequest.add(Integer.parseInt(floors[0]));
 					parsedRequest.add(Integer.parseInt(floors[1]));
 					requests.add(parsedRequest);
 				}
-				catch (Exception e)
+				catch (Exception e) // If the parse fails for some reason, inform user and move on
 				{
 					System.out.println("Failed to parse '" + request + "'");
 				}
@@ -140,8 +146,8 @@ public class Main {
 		catch (FileNotFoundException e) 
 		{
 			System.out.println("Failed to find pre-seed file (skipping)");
+			// Returning empty list is fine
 		}
-		System.out.println(requests);
 		return requests;
 	}
 }

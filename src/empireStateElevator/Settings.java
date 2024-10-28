@@ -13,6 +13,7 @@ public class Settings {
 	private static final String settingsFilePath = "app_settings.properties";
 	private static final File settingsFile = new File(settingsFilePath);
 	
+	// Field names. Public for use elsewhere in application
 	public static final String defaultFloorField = "Default_Floor";
 	public static final String numberOfElevatorsField = "Number_Of_Elevators";
 	public static final String stopFloorWaitField = "Stop_Floor_Wait";
@@ -23,10 +24,9 @@ public class Settings {
 	public static final String topFloorField = "Top_Floor";
 	public static final String bottomFloorField = "Bottom_Floor";
 
-	// Run the settings subroutine
+	// Run the settings subroutine for user to change the application settings
 	public static void run() throws Exception {
 		boolean quit = false;
-		
 		while(!quit)
 		{
 			String settingSelection = CommandLineInput.getCommandLineInput();
@@ -103,16 +103,17 @@ public class Settings {
 		}
 	}
 	
+	// Set up settings (I'm not quite sure I'm doing the default thing right, but it seems to be working)
 	public static void startup() throws Exception {
 		defaultSettings.setProperty(defaultFloorField, "1");
-		defaultSettings.setProperty(numberOfElevatorsField, "1");
-		defaultSettings.setProperty(stopFloorWaitField, "3");
-		defaultSettings.setProperty(passFloorWaitField, "1");
-		defaultSettings.setProperty(sameFloorWaitField, "2");
+		defaultSettings.setProperty(numberOfElevatorsField, "1"); // Actual number of elevators in empire state building is 73
+		defaultSettings.setProperty(stopFloorWaitField, "3"); // This should probably be a smaller unit of time
+		defaultSettings.setProperty(passFloorWaitField, "1"); // ''
+		defaultSettings.setProperty(sameFloorWaitField, "2"); // ''
 		defaultSettings.setProperty(usePreSeedFileField, "false");
-		defaultSettings.setProperty(preSeedFilePathField, "preSeed.txt");
-		defaultSettings.setProperty(topFloorField, "102");
-		defaultSettings.setProperty(bottomFloorField, "-2");
+		defaultSettings.setProperty(preSeedFilePathField, "preSeed.txt"); // Bogus file (doesn't exist)
+		defaultSettings.setProperty(topFloorField, "102"); // Actual number of floors on empire state building
+		defaultSettings.setProperty(bottomFloorField, "-2"); // I found somewhere that the building apparently has two basement levels?
 		settings = new Properties(defaultSettings);
 		
 		if (settingsFile.exists()) {
@@ -125,12 +126,13 @@ public class Settings {
 			settings.setProperty(sameFloorWaitField, "2");
 			settings.setProperty(usePreSeedFileField, "false");
 			settings.setProperty(preSeedFilePathField, "preSeed.txt");
-			defaultSettings.setProperty(topFloorField, "102");
-			defaultSettings.setProperty(bottomFloorField, "-2");
+			settings.setProperty(topFloorField, "102");
+			settings.setProperty(bottomFloorField, "-2");
 			writeSettings();
 		}
 	}
 	
+	// Get a setting's value (will probably have to be parsed into usable type)
 	public static String getSettingValue(String key)
 	{
 		return settings.getProperty(key);
@@ -138,6 +140,7 @@ public class Settings {
 	
 	//=== Private Methods ===
 	
+	// Change a setting's value
 	private static void updateSetting(String fieldName, String value) throws Exception
 	{
 		if(!getSettingValue(fieldName).equals(value))

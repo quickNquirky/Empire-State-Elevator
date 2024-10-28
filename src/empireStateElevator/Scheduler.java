@@ -18,12 +18,13 @@ public class Scheduler {
 	private List<UUID> processingRequests = new ArrayList<>(); // Requests currently being handled
 	// Ordered list of stops. If not for the hot scheduling, this could be a queue
 	private List<Integer> stops = new ArrayList<>();
-	private int nextStop;
+	private int nextStop; // Track our next stop for hot scheduling purposes
 	private int defaultFloor;
 	// Default direction is up (I'm assuming the building is mostly above ground)
+	// This could be added as a new setting, but the elevator is just going to go in the direction of it's first request
 	private Direction currentDirection = Direction.UP;
 	private int numberOfRequests = 0; // Track number of requests for routing priority
-	private String elevatorName;
+	private String elevatorName; // Used by router for UI
 	
 	public Scheduler(int defaultFloor, String elevatorName) 
 	{
@@ -36,7 +37,7 @@ public class Scheduler {
 	public synchronized void processNewRequest(int startFloor, int endFloor)
 	{	
 		numberOfRequests++;
-		if (startFloor > endFloor)
+		if (startFloor > endFloor) // Determine direction
 		{
 			UUID uuid = UUID.randomUUID(); // Make sure the requests can be found later
 			downRequests.put(uuid, getStartEndMap(startFloor, endFloor));
@@ -47,7 +48,7 @@ public class Scheduler {
 				updateStops(startFloor, endFloor, uuid);
 			}
 		}
-		else if (startFloor < endFloor)
+		else if (startFloor < endFloor) // Determine direction
 		{
 			UUID uuid = UUID.randomUUID(); // Make sure the requests can be found later
 			upRequests.put(uuid, getStartEndMap(startFloor, endFloor));
@@ -58,7 +59,7 @@ public class Scheduler {
 				updateStops(startFloor, endFloor, uuid);
 			}
 		}
-		else // same floor: toss request (should be handled by router)
+		else // same floor: toss request (should be handled by router and never reached)
 		{
 			System.out.println("Ignoring request for same floor");
 		}
@@ -73,7 +74,7 @@ public class Scheduler {
 			if(!processingRequests.isEmpty())
 			{
 				removeFulfilledRequests();
-				numberOfRequests -= processingRequests.size(); // reduce requests
+				numberOfRequests -= processingRequests.size(); // Reduce requests for routing priority
 				processingRequests.clear();
 			}
 			repopulateStops(); // Attempt to re-populate stops after reset
@@ -96,11 +97,13 @@ public class Scheduler {
 
 	}
 	
+	// Used for routing priority
 	public int getNumberOfRequests()
 	{
 		return numberOfRequests;
 	}
 	
+	// Used for routing UI
 	public String getElevatorName()
 	{
 		return elevatorName;
@@ -108,6 +111,7 @@ public class Scheduler {
 	
 	//=== Private Methods ===
 	
+	// Once the elevator changes directions, clean out fulfilled requests
 	private void removeFulfilledRequests()
 	{
 		if(currentDirection == Direction.UP)
@@ -117,7 +121,7 @@ public class Scheduler {
 				upRequests.remove(uuid);
 			}
 		}
-		else
+		else // Direction DOWN
 		{
 			for(UUID uuid: processingRequests)
 			{
@@ -126,13 +130,14 @@ public class Scheduler {
 		}
 	}
 	
+	// Try to re-populate stops
 	private void repopulateStops()
 	{
 		if(currentDirection == Direction.UP)
 		{
 			if(!downRequests.isEmpty()) // Switch to down if we have any
 			{
-				for(Map.Entry<UUID, Map<String, Integer>> request: downRequests.entrySet())
+				for(Map.Entry<UUID, Map<String, Integer>> request: downRequests.entrySet()) // Schedule all requests in direction
 				{
 					updateStops(request.getValue().get("startFloor"), request.getValue().get("endFloor"), request.getKey());
 				}
@@ -140,7 +145,7 @@ public class Scheduler {
 			}
 			else if(!upRequests.isEmpty()) // Otherwise check for more up requests
 			{
-				for(Map.Entry<UUID, Map<String, Integer>> request: upRequests.entrySet())
+				for(Map.Entry<UUID, Map<String, Integer>> request: upRequests.entrySet()) // Schedule all requests in direction
 				{
 					updateStops(request.getValue().get("startFloor"), request.getValue().get("endFloor"), request.getKey());
 				}
@@ -164,20 +169,22 @@ public class Scheduler {
 					updateStops(request.getValue().get("startFloor"), request.getValue().get("endFloor"), request.getKey());
 				}
 			}
-			else // No requests. Default direction to up
+			else // No requests. Default direction to up (although this shouldn't really matter, elevator will just go in direction of next request)
 			{
 				currentDirection = Direction.UP;
 			}
 		}
 	}
 	
+	// Add a new request to current itinerary
 	private void updateStops (int startFloor, int endFloor, UUID uuid)
 	{
 		addStop(startFloor);
 		addStop(endFloor);
-		processingRequests.add(uuid);
+		processingRequests.add(uuid); // Make sure we know this request is being fulfilled
 	}
 	
+	// Make map to be stored in containing request lists
 	private Map<String, Integer> getStartEndMap(int startFloor, int endFloor)
 	{
 		Map<String, Integer> tempMap = new HashMap<>();
@@ -186,13 +193,14 @@ public class Scheduler {
 		return tempMap;
 	}
 	
+	// Add a new stop to current itinerary
 	private void addStop(int floor)
 	{
 		// If the stop is on the list or the elevator is currently at or heading to the same floor, ignore
 		if (!(stops.contains(floor) || floor == nextStop))
 		{
 			stops.add(floor);
-			stops.sort(null);
+			stops.sort(null); // Make sure the stops stay ordered
 		}
 	}
 }
